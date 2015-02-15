@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SimpleLogger
 {
-    /// <summary> Interface para criação de um logger simples - deve conter um método para registrar mensagens e o método Dispose para concluir a gravação das mensagens </summary>
+    /// <summary> Interface para criação de um logger simples - deve conter um método para registrar mensagens e o método Dispose para concluir a gravação das mensagens e um diretorio opcional para registro de Logs em arquivo </summary>
     public interface ILogger: IDisposable
     {
         /// <summary> Registra uma mensagem de log no sistema </summary>

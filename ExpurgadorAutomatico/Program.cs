@@ -23,6 +23,7 @@ namespace ExpurgadorAutomatico
                 //Garante que caso ocorra alguma exceção inesperada o sistema irá registrar corretamente o erro
                 try
                 {
+                    //Verifica se os dados enviados são válidos
                     if (!validador.ValidarParametros(args, logger))
                         return;
 
@@ -51,9 +52,11 @@ namespace ExpurgadorAutomatico
                         return;
                     }
 
+                    //Executa em paralelo a deleção de todos os arquivos filtrados - A execução em paralelo é dispensável em testes com arquivos pequenos,
+                    //  mas em produção com arquivos pesados como backups de bancos de dados, ela pode ser extremamente importante em termos de performance
                     Parallel.ForEach(arquivosFiltrados, arquivoFiltrado =>
                     {
-                        logger.RegistrarMensagem( string.Format("Arquivo {0} deletado.", arquivoFiltrado.Name) );
+                        logger.RegistrarMensagem( string.Format("Arquivo {0} ({1}) deletado.", arquivoFiltrado.Name, arquivoFiltrado.LastWriteTimeUtc) );
                         arquivoFiltrado.Delete();
                     });
                 }
