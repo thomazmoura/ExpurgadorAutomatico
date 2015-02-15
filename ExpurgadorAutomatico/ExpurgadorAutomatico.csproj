@@ -43,8 +43,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IValidadorParametros.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ValidadorParametros.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SimpleLogger\SimpleLogger.csproj">

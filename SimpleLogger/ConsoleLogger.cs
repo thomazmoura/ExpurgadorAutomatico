@@ -9,6 +9,12 @@ namespace SimpleLogger
     /// <summary> Logger para depuração - Digita as mensagens no console e, ao terminar a transação, aguarda uma entrada qualquer do usuário </summary>
     public class ConsoleLogger: ILogger
     {
+        /// <summary> Construtor do ConsoleLogger. Efetua configurações estétivas </summary>
+        public ConsoleLogger()
+        {
+            Console.WriteLine();
+        }
+
         /// <summary> Insere uma mensagem como uma linha do Console </summary>
         /// <param name="Mensagem"> A mensagem a ser exibida na tela de Console </param>
         public void RegistrarMensagem(string Mensagem)

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace ExpurgadorAutomatico
 {
@@ -14,6 +15,7 @@ namespace ExpurgadorAutomatico
             //Instancia a variável logger com uma instância da classe ConsoleLogger (que "registra" as mensagens apenas na tela de console e aguarda a
             //  entrada do usuário ao ser encerrada a execução)
             ILogger logger = new ConsoleLogger();
+            IValidadorParametros validador = new ValidadorParametros();
             
             //Utiliza a instância do logger apenas durante a execução do sistema
             using (logger)
@@ -21,39 +23,39 @@ namespace ExpurgadorAutomatico
                 //Garante que caso ocorra alguma exceção inesperada o sistema irá registrar corretamente o erro
                 try
                 {
-
-                    //Verifica se não foi passado um dos parâmetros necessários, registra uma nesagem de erro e encerra a aplicação
-                    if (args.Length < 2
-                        || String.IsNullOrEmpty(args[0])
-                        || String.IsNullOrEmpty(args[1]))
-                    {
-                        logger.RegistrarMensagem("Não foram passados os parâmetros necessários.");
-                        logger.RegistrarMensagem("Informe o endereço e a quantidade de arquivos que deve ser mantida.");
+                    if (!validador.ValidarParametros(args, logger))
                         return;
-                    }
 
-                    //Converte o segundo parâmetro para inteiro (e encerra a aplicação caso não consiga converter)
-                    try
-                    {
-                        int quantidadeArquivos = int.Parse(args[1]);
-                    }
-                    catch (FormatException)
-                    {
-                        logger.RegistrarMensagem("O segundo parâmetro deve ser um número");
-                        return;
-                    }
 
-                    //Verifica se o diretório passado como parâmetro existe ou não
-                    DirectoryInfo diretorio = new DirectoryInfo(args[0]);
-                    if (diretorio.Exists)
-                    {
-                        logger.RegistrarMensagem("O diretorio existe.");
-                    }
-                    else
+                    //Verifica se o diretório passado como parâmetro não existe - e instancia o diretório nesse caso.
+                    var diretorio = new DirectoryInfo(args[0]);
+                    if (!diretorio.Exists)
                     {
                         logger.RegistrarMensagem("O diretorio não existe.");
+                        diretorio.Create();
+                        logger.RegistrarMensagem("Diretório criado.");
                     }
 
+                    //Obtém a lista de arquivos armazenadas no diretório especificado (como vetor)
+                    var arquivos = diretorio.GetFiles();
+
+                    //Obtém a lista de arquivos que serão excluídos ordenando-os pela data de modificação ("pulando" a quantidade de arquivos definidas por parâmetro)
+                    var arquivosFiltrados = arquivos
+                        .OrderByDescending(a => a.LastWriteTimeUtc)
+                        .Skip(int.Parse(args[1]));
+
+                    //Verifica se não há nenhum arquivo que seria deletado
+                    if (arquivosFiltrados.Count() <= 0)
+                    {
+                        logger.RegistrarMensagem("Não há nenhum arquivo para ser deletado.");
+                        return;
+                    }
+
+                    Parallel.ForEach(arquivosFiltrados, arquivoFiltrado =>
+                    {
+                        logger.RegistrarMensagem( string.Format("Arquivo {0} deletado.", arquivoFiltrado.Name) );
+                        arquivoFiltrado.Delete();
+                    });
                 }
                 catch (Exception ex)
                 {
